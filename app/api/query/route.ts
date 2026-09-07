@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Database from 'better-sqlite3';
 import { gerarSQL, gerarRespostaTexto } from '@/lib/gemini';
+import path from 'path';
+
+const db = new Database(
+  path.join(process.cwd(), 'lib', 'db', 'filmes.sqlite'),
+  { readonly: true }
+);
 
 function validarSQL(sql: string): boolean {
   const sqlLimpo = sql.trim().toUpperCase();
@@ -34,9 +40,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const db = new Database('lib/db/filmes.sqlite', { readonly: true });
     const resultadoCompleto = db.prepare(sqlGerado).all();
-    db.close();
 
     const LIMITE_MAX = 10;
     const foiTruncado = resultadoCompleto.length > LIMITE_MAX;
