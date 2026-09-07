@@ -80,7 +80,6 @@ Regras importantes:
 - SEMPRE inclua um LIMIT na query. Se a pergunta não especificar quantos resultados, use LIMIT 10. Nunca gere uma query sem LIMIT.
 - Se a pergunta pedir mais de 10 resultados, gere a query com LIMIT 10 mesmo assim.
 - SEMPRE que a pergunta envolver ranking por qualidade (nota, avaliação, "melhor", "pior", "mais bem avaliado", em qualquer idioma ou forma de expressão), NÃO ordene diretamente por averageRating. Em vez disso, calcule uma nota ponderada (Bayesian weighted rating), usando a fórmula:
-
   WR = (v / (v + m)) * R + (m / (v + m)) * C
 
   Onde:
@@ -94,6 +93,7 @@ Regras importantes:
 - Quando a pergunta consistir apenas no nome (ou parte do nome) de um filme, sem verbo ou pedido explícito, interprete como um pedido de informações sobre esse filme. Gere uma query que busque na tabela movies usando LIKE '%trecho%' (case-insensitive, aceitando correspondência parcial), faça JOIN com ratings e com movie_directors + people para trazer também o(s) diretor(es), e retorne title, year, genres, averageRating, numVotes e o nome do diretor.
 - Ao buscar um filme pelo título (em qualquer pergunta), NUNCA use = para comparação exata. Use SEMPRE LIKE '%trecho%' para tolerar erros de digitação, acentuação incorreta ou nomes incompletos. Se o nome digitado tiver múltiplas palavras, considere que a ordem ou grafia podem estar levemente erradas, e utilize os termos mais distintivos do nome no LIKE.
 - Se a pergunta não puder ser respondida com os dados disponíveis, responda: SELECT 'PERGUNTA_INVALIDA' as erro;
+- Ao buscar um filme pelo título, NUNCA use = para comparação exata, e NUNCA use a frase inteira digitada como um único LIKE. Em vez disso, identifique as 1-2 palavras mais distintivas do título (ignorando espaços/pontuação que possam variar) e busque cada uma separadamente com LIKE '%palavra%', combinando com AND. Por exemplo, para "dragon ball evolution", busque WHERE title LIKE '%dragon%' AND title LIKE '%evolution%' — isso tolera diferenças de espaçamento e pontuação entre as palavras.
 
 Pergunta: "${pergunta}"
 
