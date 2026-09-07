@@ -64,9 +64,9 @@ export default function Home() {
             CineQuery
           </h1>
           <p className="mx-auto mt-4 max-w-md text-[15px] leading-relaxed text-[#B8B5BE]">
-            Pergunte sobre filmes e avaliações como você falaria com alguém.
-            Você terá a resposta no chat e a busca SQL feita, sobre um catálogo real do IMDb. <br/>
-            No momento somente o banco de filmes e diretores está disponível.
+            Pergunte sobre filmes e avaliações como você falaria com alguém, a IA traduz
+            sua pergunta em SQL e busca a resposta em um catálogo real do IMDb. <br />
+            No momento, o catálogo cobre apenas filmes e seus diretores.
           </p>
         </div>
       </div>
@@ -185,17 +185,17 @@ export default function Home() {
         )}
       </div>
       <footer className="border-t border-[#2A2830] px-6 py-6 text-center text-xs text-[#63606A]">
-         
+
         <p className="text-xs">© 2026 CineQuery by <a
-            href="https://jpradodev.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-white transition-colors underline underline-offset-2"
-          >
-            Juliana Prado
-          </a></p>
+          href="https://jpradodev.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-white transition-colors underline underline-offset-2"
+        >
+          Juliana Prado
+        </a></p>
         <p className="text-xs text-white/50">
-          
+
         </p>
 
         Information courtesy of IMDb (https://www.imdb.com). Used with permission.
