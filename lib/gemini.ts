@@ -49,8 +49,10 @@ Dados retornados do banco (JSON): ${amostra}
 Regras:
 - Responda em português, em 1 ou 2 frases curtas, como se estivesse conversando.
 - NÃO use markdown, NÃO liste os dados em formato de tabela ou lista.
-- Apenas resuma o que foi encontrado de forma natural (ex: "Encontrei os filmes X e Y, dirigidos por..." ou "Foram encontrados 5 filmes, com destaque para...").
-- Se não houver resultados, diga isso de forma gentil.
+- Se a pergunta for apenas o nome de um filme (sem verbo/pedido explícito) e houver um resultado correspondente, apresente esse filme: ano, gênero, nota e diretor, como se estivesse descrevendo o filme para alguém.
+- Se a pergunta parecer ser o nome de um filme mas não houver correspondência exata nos dados retornados, informe gentilmente que não encontrou esse título específico, e sugira o(s) resultado(s) mais próximo(s) encontrados, se houver.
+- Caso contrário, resuma o que foi encontrado de forma natural (ex: "Encontrei os filmes X e Y, dirigidos por..." ou "Foram encontrados 5 filmes, com destaque para...").
+- Se não houver resultados de fato, diga isso de forma gentil.
 
 Resposta:
 `;
@@ -66,7 +68,7 @@ Resposta:
 export async function gerarSQL(pergunta: string): Promise<string> {
   const model = genAI.getGenerativeModel({ model: 'gemini-flash-lite-latest' });
 
-  const prompt = `
+ const prompt = `
 Você é um assistente que converte perguntas em linguagem natural para queries SQL (dialeto SQLite).
 
 ${SCHEMA}
@@ -78,6 +80,7 @@ Regras importantes:
 - SEMPRE inclua um LIMIT na query. Se a pergunta não especificar quantos resultados, use LIMIT 10. Nunca gere uma query sem LIMIT.
 - Se a pergunta pedir mais de 10 resultados, gere a query com LIMIT 10 mesmo assim.
 - SEMPRE que a pergunta envolver ranking por qualidade (nota, avaliação, "melhor", "pior", "mais bem avaliado", em qualquer idioma ou forma de expressão), NÃO ordene diretamente por averageRating. Em vez disso, calcule uma nota ponderada (Bayesian weighted rating), usando a fórmula:
+
   WR = (v / (v + m)) * R + (m / (v + m)) * C
 
   Onde:
@@ -88,6 +91,8 @@ Regras importantes:
 
   Use essa fórmula no SELECT como uma coluna calculada (ex: AS weightedRating) e ordene por ela em vez de averageRating diretamente. Isso evita destacar títulos obscuros com poucos votos.
 - Quando a pergunta for sobre gênero/categoria (ex: comédia, terror, ação) SEM pedir ranking explícito por qualidade, ainda assim prefira ordenar pela nota ponderada (mesma fórmula acima) como critério padrão de relevância, salvo se a pergunta pedir outra ordem específica (ex: por ano, por nome).
+- Quando a pergunta consistir apenas no nome (ou parte do nome) de um filme, sem verbo ou pedido explícito, interprete como um pedido de informações sobre esse filme. Gere uma query que busque na tabela movies usando LIKE '%trecho%' (case-insensitive, aceitando correspondência parcial), faça JOIN com ratings e com movie_directors + people para trazer também o(s) diretor(es), e retorne title, year, genres, averageRating, numVotes e o nome do diretor.
+- Ao buscar um filme pelo título (em qualquer pergunta), NUNCA use = para comparação exata. Use SEMPRE LIKE '%trecho%' para tolerar erros de digitação, acentuação incorreta ou nomes incompletos. Se o nome digitado tiver múltiplas palavras, considere que a ordem ou grafia podem estar levemente erradas, e utilize os termos mais distintivos do nome no LIKE.
 - Se a pergunta não puder ser respondida com os dados disponíveis, responda: SELECT 'PERGUNTA_INVALIDA' as erro;
 
 Pergunta: "${pergunta}"
